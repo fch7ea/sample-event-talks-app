@@ -266,6 +266,34 @@ document.addEventListener('DOMContentLoaded', () => {
     refreshBtn.addEventListener('click', fetchReleases);
     retryBtn.addEventListener('click', fetchReleases);
 
+    // Theme Toggle Logic
+    const themeToggle = document.getElementById('theme-toggle');
+    const sunIcon = themeToggle.querySelector('.theme-icon-light');
+    const moonIcon = themeToggle.querySelector('.theme-icon-dark');
+
+    // Retrieve saved theme or default to dark
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+    }
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        if (currentTheme === 'light') {
+            document.documentElement.removeAttribute('data-theme');
+            sunIcon.classList.add('hidden');
+            moonIcon.classList.remove('hidden');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            sunIcon.classList.remove('hidden');
+            moonIcon.classList.add('hidden');
+            localStorage.setItem('theme', 'light');
+        }
+    });
+
     // Initial Fetch
     fetchReleases();
 });
