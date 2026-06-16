@@ -245,16 +245,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Character counter updates and Tweet button validation
     function updateCharCount() {
         const text = tweetTextarea.value;
-        
-        // Count URLs correctly as Twitter standard 23 chars
-        const urlRegex = /https?:\/\/[^\s]+/g;
         let length = text.length;
-        const matches = text.match(urlRegex);
         
-        if (matches) {
-            matches.forEach(url => {
+        // Count the exact original release link as 23 characters.
+        // Any appended text (even if touching the link) will be counted by its actual length.
+        if (selectedUpdate && selectedUpdate.link) {
+            const url = selectedUpdate.link;
+            if (text.includes(url)) {
                 length = length - url.length + 23;
-            });
+            }
         }
 
         charCounter.textContent = length;
