@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const refreshBtn = document.getElementById('refresh-btn');
     const retryBtn = document.getElementById('retry-btn');
     const updateCount = document.getElementById('update-count');
+    const exportCsvBtn = document.getElementById('export-csv-btn');
     
     const noSelectionState = document.getElementById('no-selection-state');
     const composerState = document.getElementById('composer-state');
@@ -53,6 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // UI states
         feedContainer.classList.add('hidden');
         errorMessage.classList.add('hidden');
+        exportCsvBtn.classList.add('hidden');
         skeleton.classList.remove('hidden');
         refreshBtn.querySelector('.spinner-icon').classList.add('spinning');
         refreshBtn.disabled = true;
@@ -65,6 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await response.json();
             allReleases = data;
             renderFeed(data);
+            exportCsvBtn.classList.remove('hidden');
         } catch (error) {
             console.error('Error fetching release notes:', error);
             errorText.textContent = error.message || 'Check your internet connection or server status.';
@@ -114,14 +117,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 card.innerHTML = `
                     <div class="card-header">
                         <span class="badge ${badgeClass}">${update.type}</span>
-                        <span class="card-date">${dayRelease.date}</span>
+                        <div class="card-header-actions">
+                            <span class="card-date">${dayRelease.date}</span>
+                            <button class="btn-copy" title="Copy to Clipboard">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         ${update.description}
                     </div>
                 `;
 
-                // Handle selecting
+                // Copy to Clipboard logic
+                const copyBtn = card.querySelector('.btn-copy');
+                copyBtn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Avoid triggering card selection
+                    const plainText = cleanHtmlText(update.description).trim();
+                    const formattedText = `BigQuery Update [${dayRelease.date}] (${update.type}):\n${plainText}`;
+
+                    navigator.clipboard.writeText(formattedText).then(() => {
+                        copyBtn.classList.add('copied');
+                        copyBtn.innerHTML = `
+                            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"></polyline>
+                            </svg>
+                        `;
+                        setTimeout(() => {
+                            copyBtn.classList.remove('copied');
+                            copyBtn.innerHTML = `
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                                </svg>
+                            `;
+                        }, 1500);
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
+                });
+
+                // Handle selecting card
                 card.addEventListener('click', () => {
                     document.querySelectorAll('.update-card').forEach(c => c.classList.remove('selected'));
                     card.classList.add('selected');
@@ -167,7 +206,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const text = tweetTextarea.value;
         
         // Count URLs correctly as Twitter standard 23 chars
-        // Simple URL finder regex
         const urlRegex = /https?:\/\/[^\s]+/g;
         let length = text.length;
         const matches = text.match(urlRegex);
@@ -194,6 +232,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const encodedText = encodeURIComponent(text);
         const twitterUrl = `https://twitter.com/intent/tweet?text=${encodedText}`;
         window.open(twitterUrl, '_blank', 'noopener,noreferrer');
+    });
+
+    // Export to CSV button click handler
+    exportCsvBtn.addEventListener('click', () => {
+        if (allReleases.length === 0) return;
+        
+        let csvContent = "\ufeff"; // Add UTF-8 BOM for proper Excel encoding
+        csvContent += "Date,Type,Description,Link\n";
+        
+        allReleases.forEach(dayRelease => {
+            dayRelease.updates.forEach(update => {
+                const plainText = cleanHtmlText(update.description).trim().replace(/"/g, '""');
+                const escapedDate = dayRelease.date.replace(/"/g, '""');
+                const escapedType = update.type.replace(/"/g, '""');
+                const escapedLink = dayRelease.link.replace(/"/g, '""');
+                csvContent += `"${escapedDate}","${escapedType}","${plainText}","${escapedLink}"\n`;
+            });
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "bigquery_release_notes.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     });
 
     // Refresh & Retry button listeners

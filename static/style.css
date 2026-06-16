@@ -265,6 +265,36 @@ body {
     margin-bottom: 0.75rem;
 }
 
+.card-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.btn-copy {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+    z-index: 10;
+}
+
+.btn-copy:hover {
+    color: var(--text-primary);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-copy.copied {
+    color: #10b981;
+    background: rgba(16, 185, 129, 0.1);
+}
+
 .badge {
     padding: 0.25rem 0.6rem;
     border-radius: 6px;
