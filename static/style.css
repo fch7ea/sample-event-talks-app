@@ -26,6 +26,12 @@
     --code-text: #cbd5e1;
     --link-hover: #7dd3fc;
     
+    --bg-secondary-btn: #1e293b;
+    --text-secondary-btn: #cbd5e1;
+    --bg-secondary-btn-hover: #334155;
+    --bg-badge-count: #1e293b;
+    --text-badge-count: #94a3b8;
+    
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -47,6 +53,12 @@
     --code-bg: rgba(15, 23, 42, 0.06);
     --code-text: #0f172a;
     --link-hover: #0369a1;
+    
+    --bg-secondary-btn: #e2e8f0;
+    --text-secondary-btn: #0f172a;
+    --bg-secondary-btn-hover: #cbd5e1;
+    --bg-badge-count: #cbd5e1;
+    --text-badge-count: #0f172a;
     
     --shadow-glow: 0 0 20px rgba(2, 132, 199, 0.1);
 }
@@ -160,13 +172,13 @@ body {
 }
 
 .btn-secondary {
-    background-color: #334155;
-    color: var(--text-primary);
+    background-color: var(--bg-secondary-btn);
+    color: var(--text-secondary-btn);
     border: 1px solid var(--border-color);
 }
 
 .btn-secondary:hover {
-    background-color: #475569;
+    background-color: var(--bg-secondary-btn-hover);
 }
 
 .btn-twitter {
@@ -222,13 +234,14 @@ body {
 }
 
 .badge-count {
-    background: #1e293b;
+    background: var(--bg-badge-count);
     border: 1px solid var(--border-color);
     padding: 0.2rem 0.6rem;
     border-radius: 20px;
     font-size: 0.8rem;
     font-weight: 600;
-    color: var(--text-secondary);
+    color: var(--text-badge-count);
+    transition: background var(--transition-normal), color var(--transition-normal);
 }
 
 /* Grouping by Date */
@@ -618,3 +631,132 @@ body {
         padding-bottom: 300px; /* Space for fixed bottom drawer */
     }
 }
+
+/* Filter Toolbar */
+.filter-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    padding: 1rem;
+    border-radius: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1;
+    min-width: 250px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+#search-input {
+    width: 100%;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    outline: none;
+    transition: var(--transition-fast);
+}
+
+#search-input:focus {
+    border-color: var(--border-active);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+}
+
+.filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.filter-btn {
+    padding: 0.5rem 1rem;
+    background: rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    transition: var(--transition-fast);
+}
+
+.filter-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.filter-btn.active {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+}
+
+/* Light mode overrides for filter inputs */
+[data-theme="light"] #search-input,
+[data-theme="light"] .filter-btn {
+    background: rgba(255, 255, 255, 0.6);
+}
+
+[data-theme="light"] .filter-btn:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .filter-btn.active {
+    background: var(--color-primary);
+    color: white;
+}
+
+/* Hover Selection Hint button */
+.btn-draft-hint {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.3rem;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+    opacity: 0;
+}
+
+.update-card:hover .btn-draft-hint {
+    opacity: 0.7;
+}
+
+.btn-draft-hint:hover {
+    color: var(--border-active);
+    opacity: 1 !important;
+    background: rgba(56, 189, 248, 0.1);
+}
+
+/* Disabled Tweet Button */
+.btn-twitter:disabled {
+    background-color: #334155 !important;
+    color: var(--text-muted) !important;
+    cursor: not-allowed;
+    opacity: 0.6;
+    box-shadow: none;
+    transform: none !important;
+}
+

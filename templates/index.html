@@ -66,6 +66,22 @@
                     <h2>Latest Releases</h2>
                     <span id="update-count" class="badge-count">Loading...</span>
                 </div>
+
+                <div class="filter-toolbar">
+                    <div class="search-wrapper">
+                        <svg class="search-icon icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Search release notes...">
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All</button>
+                        <button class="filter-btn" data-filter="feature">Features</button>
+                        <button class="filter-btn" data-filter="issue">Issues</button>
+                        <button class="filter-btn" data-filter="deprecation">Deprecations</button>
+                    </div>
+                </div>
                 
                 <div id="error-message" class="error-container hidden">
                     <div class="error-card">

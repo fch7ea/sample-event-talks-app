@@ -9,6 +9,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateCount = document.getElementById('update-count');
     const exportCsvBtn = document.getElementById('export-csv-btn');
     
+    // Search and Filter Elements
+    const searchInput = document.getElementById('search-input');
+    const filterBtns = document.querySelectorAll('.filter-btn');
+
     const noSelectionState = document.getElementById('no-selection-state');
     const composerState = document.getElementById('composer-state');
     const selectedTypeBadge = document.getElementById('selected-type-badge');
@@ -19,6 +23,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let allReleases = [];
     let selectedUpdate = null;
+    let activeFilter = 'all';
+    let activeSearch = '';
 
     // Helper: Strip HTML tags to get clean plain text
     function cleanHtmlText(html) {
@@ -66,7 +72,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const data = await response.json();
             allReleases = data;
-            renderFeed(data);
+            
+            // Apply current filters upon fetch
+            filterAndRender();
             exportCsvBtn.classList.remove('hidden');
         } catch (error) {
             console.error('Error fetching release notes:', error);
@@ -80,13 +88,36 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Filter and Render combination
+    function filterAndRender() {
+        const filtered = allReleases.map(dayRelease => {
+            const matchingUpdates = dayRelease.updates.filter(update => {
+                // Filter by Category
+                const matchesCategory = activeFilter === 'all' || update.type.toLowerCase().includes(activeFilter);
+                
+                // Filter by Search Query
+                const textToSearch = `${update.type} ${cleanHtmlText(update.description)}`.toLowerCase();
+                const matchesSearch = textToSearch.includes(activeSearch.toLowerCase());
+                
+                return matchesCategory && matchesSearch;
+            });
+            
+            return {
+                ...dayRelease,
+                updates: matchingUpdates
+            };
+        }).filter(dayRelease => dayRelease.updates.length > 0);
+        
+        renderFeed(filtered);
+    }
+
     // Render the feed data
     function renderFeed(releases) {
         feedContainer.innerHTML = '';
         let totalUpdates = 0;
 
         if (releases.length === 0) {
-            feedContainer.innerHTML = '<div class="no-selection-state"><p>No release notes found.</p></div>';
+            feedContainer.innerHTML = '<div class="no-selection-state"><p>No matching release notes found.</p></div>';
             updateCount.textContent = '0 updates';
             return;
         }
@@ -107,6 +138,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 const card = document.createElement('div');
                 card.className = 'update-card';
                 
+                // Keep selected state if this update is already selected
+                if (selectedUpdate && selectedUpdate.update.description === update.description && selectedUpdate.date === dayRelease.date) {
+                    card.classList.add('selected');
+                }
+                
                 // Identify the badge class
                 const typeLower = update.type.toLowerCase();
                 let badgeClass = 'update';
@@ -119,6 +155,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="badge ${badgeClass}">${update.type}</span>
                         <div class="card-header-actions">
                             <span class="card-date">${dayRelease.date}</span>
+                            <button class="btn-draft-hint" title="Draft Tweet">
+                                <svg class="icon" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                                </svg>
+                            </button>
                             <button class="btn-copy" title="Copy to Clipboard">
                                 <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
@@ -201,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCharCount();
     }
 
-    // Character counter updates
+    // Character counter updates and Tweet button validation
     function updateCharCount() {
         const text = tweetTextarea.value;
         
@@ -219,12 +260,32 @@ document.addEventListener('DOMContentLoaded', () => {
         charCounter.textContent = length;
         if (length > 280) {
             charCounter.parentElement.classList.add('danger');
+            tweetBtn.disabled = true;
+            tweetBtn.title = "Tweet exceeds the 280 character limit";
         } else {
             charCounter.parentElement.classList.remove('danger');
+            tweetBtn.disabled = false;
+            tweetBtn.title = "Draft is ready to post!";
         }
     }
 
     tweetTextarea.addEventListener('input', updateCharCount);
+
+    // Search input listener
+    searchInput.addEventListener('input', (e) => {
+        activeSearch = e.target.value;
+        filterAndRender();
+    });
+
+    // Category filter button listeners
+    filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            activeFilter = btn.dataset.filter;
+            filterAndRender();
+        });
+    });
 
     // Tweet button click handler
     tweetBtn.addEventListener('click', () => {
