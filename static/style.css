@@ -20,6 +20,12 @@
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     --shadow-glow: 0 0 20px rgba(56, 189, 248, 0.15);
     
+    --text-brand-start: #fff;
+    --text-brand-end: #cbd5e1;
+    --code-bg: rgba(0, 0, 0, 0.3);
+    --code-text: #cbd5e1;
+    --link-hover: #7dd3fc;
+    
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -35,6 +41,12 @@
     --text-primary: #0f172a;
     --text-secondary: #334155;
     --text-muted: #64748b;
+    
+    --text-brand-start: #0f172a;
+    --text-brand-end: #334155;
+    --code-bg: rgba(15, 23, 42, 0.06);
+    --code-text: #0f172a;
+    --link-hover: #0369a1;
     
     --shadow-glow: 0 0 20px rgba(2, 132, 199, 0.1);
 }
@@ -110,7 +122,7 @@ body {
     font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: -0.02em;
-    background: linear-gradient(to right, #fff, #cbd5e1);
+    background: linear-gradient(to right, var(--text-brand-start), var(--text-brand-end));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -372,17 +384,17 @@ body {
 }
 
 .card-body a:hover {
-    color: #7dd3fc;
+    color: var(--link-hover);
     border-bottom-style: solid;
 }
 
 .card-body code {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85em;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--code-bg);
     padding: 0.15rem 0.3rem;
     border-radius: 4px;
-    color: #cbd5e1;
+    color: var(--code-text);
 }
 
 .card-body ul, .card-body ol {
